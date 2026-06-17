@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://yourdomain.com/schemas/template-schema.json",
+  "title": "Blox Template Definition",
+  "description": "Schema for a BLOX template file. The root object stores the schema version, the template definition, and checkpoint metadata.",
+  "type": "object",
+  "required": ["definition", "checkpoints"],
+  "additionalProperties": false,
+  "definitions": {
+    "dependencyVersion": {
+      "description": "A dependency version requirement. Use either a single version number or a [minVersion, maxVersion] range.",
+      "oneOf": [
+        {
+          "type": "number",
+          "description": "Exact version requirement."
+        },
+        {
+          "type": "array",
+          "description": "Inclusive version range expressed as [minVersion, maxVersion].",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      ]
+    },
+    "checkpoint": {
+      "type": "object",
+      "description": "A saved checkpoint for a template or block, keyed by an arbitrary checkpoint name.",
+      "required": ["commit"],
+      "properties": {
+        "commit": {
+          "type": "string",
+          "description": "The commit hash that identifies the checkpoint snapshot."
+        },
+        "version": {
+          "type": "number",
+          "description": "Optional checkpoint version number."
+        },
+        "branch": {
+          "type": "string",
+          "description": "Optional branch name associated with the checkpoint."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "description": "Optional BLOX schema version for this file."
+    },
+    "definition": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The template name."
+        },
+        "version": {
+          "type": "number",
+          "description": "Optional major version for the template definition."
+        },
+        "bases": {
+          "type": "array",
+          "description": "Optional list of base templates that this template extends. Each entry can point to a specific version or a version range.",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the base template."
+              },
+              "version": {
+                "$ref": "#/definitions/dependencyVersion"
+              }
+            },
+            "description": "A single base template reference."
+          }
+        },
+        "ignore": {
+          "type": "array",
+          "description": "File patterns to ignore when initializing or updating the template.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "init": {
+          "type": "string",
+          "description": "Command to run after the template is initialized or added."
+        },
+        "add": {
+          "type": "string",
+          "description": "Command to run when this template is added to a project."
+        },
+        "update": {
+          "type": "string",
+          "description": "Command to run when this template is updated."
+        },
+        "remove": {
+          "type": "string",
+          "description": "Command to run when this template is removed."
+        }
+      }
+    },
+    "checkpoints": {
+      "type": "object",
+      "description": "Checkpoint records keyed by checkpoint name.",
+      "additionalProperties": {
+        "$ref": "#/definitions/checkpoint"
+      }
+    },
+    "project": {
+      "type": "object",
+      "description": "Optional project-level settings for the BLOX file.",
+      "properties": {
+        "ignore": {
+          "type": "array",
+          "description": "Project-level file patterns to ignore.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
