@@ -47,6 +47,10 @@
     }
   },
   "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to the JSON schema used for editor validation/autocompletion."
+    },
     "schemaVersion": {
       "type": "number",
       "description": "Optional BLOX schema version for this file."
