@@ -1,0 +1,171 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://yourdomain.com/schemas/block-schema.json",
+  "title": "Blox Block Definition",
+  "description": "Schema for a BLOX block file. The root object stores the definition, optional schema metadata, and checkpoint records.",
+  "type": "object",
+  "required": ["definition", "checkpoints"],
+  "additionalProperties": false,
+  "definitions": {
+    "dependencyVersion": {
+      "description": "A dependency version requirement. Use either a single version number or a [minVersion, maxVersion] range.",
+      "oneOf": [
+        {
+          "type": "number",
+          "description": "Exact version requirement."
+        },
+        {
+          "type": "array",
+          "description": "Inclusive version range expressed as [minVersion, maxVersion].",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      ]
+    },
+    "checkpoint": {
+      "type": "object",
+      "description": "A saved checkpoint for a block or template, keyed by an arbitrary checkpoint name.",
+      "required": ["commit"],
+      "properties": {
+        "commit": {
+          "type": "string",
+          "description": "The commit hash that identifies the checkpoint snapshot."
+        },
+        "version": {
+          "type": "number",
+          "description": "Optional checkpoint version number."
+        },
+        "branch": {
+          "type": "string",
+          "description": "Optional branch name associated with the checkpoint."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "description": "Optional BLOX schema version for this file."
+    },
+    "definition": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The block name."
+        },
+        "version": {
+          "type": "number",
+          "description": "Optional major version for the block definition."
+        },
+        "bases": {
+          "type": "array",
+          "description": "Optional list of base templates that this block extends.",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the base template."
+              },
+              "version": {
+                "$ref": "#/definitions/dependencyVersion"
+              }
+            },
+            "description": "A single base template reference."
+          }
+        },
+        "ignore": {
+          "type": "array",
+          "description": "File patterns to ignore when initializing or updating the block.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "init": {
+          "type": "string",
+          "description": "Command to run after the block is initialized or added."
+        },
+        "add": {
+          "type": "string",
+          "description": "Command to run when this block is added to a project."
+        },
+        "update": {
+          "type": "string",
+          "description": "Command to run when this block is updated."
+        },
+        "remove": {
+          "type": "string",
+          "description": "Command to run when this block is removed."
+        },
+        "templates": {
+          "type": "array",
+          "description": "Templates that this block depends on.",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the template dependency."
+              },
+              "version": {
+                "$ref": "#/definitions/dependencyVersion"
+              }
+            },
+            "description": "A single template dependency reference."
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "description": "Other blocks that this block depends on.",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the block dependency."
+              },
+              "version": {
+                "$ref": "#/definitions/dependencyVersion"
+              }
+            },
+            "description": "A single block dependency reference."
+          }
+        }
+      }
+    },
+    "checkpoints": {
+      "type": "object",
+      "description": "Checkpoint records keyed by checkpoint name.",
+      "additionalProperties": {
+        "$ref": "#/definitions/checkpoint"
+      }
+    },
+    "project": {
+      "type": "object",
+      "description": "Optional project-level settings for the BLOX file.",
+      "properties": {
+        "ignore": {
+          "type": "array",
+          "description": "Project-level file patterns to ignore.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
